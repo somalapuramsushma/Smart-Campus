@@ -15,17 +15,3 @@ export default function Dashboard(){
 
 
 
-
-
-
-// import Overview from "../components/OverView";
-// export default function DashBoard(){
-
-//     return <div>
-//         <h3 className="font-bold text-xl">Welcome</h3>
-
-//         <section >
-//             <Overview/>
-//         </section>
-//     </div>
-// }
