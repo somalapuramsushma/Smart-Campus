@@ -9,10 +9,10 @@ const dbConfig=()=>{
         await SensorReading.syncIndexes()
         console.log("indexes synced")
         const countDocuments= await SensorReading.countDocuments()
-        if(countDocuments<200){
-            
+        
+        
             generateReadings()
-        }
+        
 
         
     
