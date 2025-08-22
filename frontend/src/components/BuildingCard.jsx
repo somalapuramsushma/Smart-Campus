@@ -11,7 +11,8 @@ export default function BuildingCard({buildingId}){
     const today= new Date().toISOString().split("T")[0]
     const yesterday=new Date(today)
     yesterday.setDate(yesterday.getDate()-1)
-    console.log(today,yesterday)
+
+
     useEffect(()=>{
         if(buildingId){
             axios.get(`http://localhost:5000/api/buildings/${buildingId}/daily-usage?date=${today}`)
@@ -32,13 +33,13 @@ export default function BuildingCard({buildingId}){
         return sum
     }
 
-    return <>
-        <Link to={`/building-details/${buildingId} `}>
+    return <div className="block max-w-sm p-6 bg-blue-400 border border-gray-200 rounded-2xl shadow hover:shadow-lg transition duration-300 ease-in-out">
+        <Link to={`/building-details/${buildingId}` } >
             <h3>Building-{buildingId}</h3>
             <p>Todays Usage: {calculateUsage(todaysData).toFixed(2)}</p>
-            <p>Trends: {(((calculateUsage(todaysData)-calculateUsage(yesterdaysData))/calculateUsage(yesterdaysData))*100).toFixed(1)}% usage than yesterday</p>
+            <p>Trends: {calculateUsage(yesterdaysData)!==0?((((calculateUsage(todaysData)-calculateUsage(yesterdaysData))/calculateUsage(yesterdaysData))*100).toFixed(1)):0}% usage than yesterday</p>
 
 
         </Link>
-    </>
+    </div>
 }

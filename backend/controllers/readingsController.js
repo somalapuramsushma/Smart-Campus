@@ -1,5 +1,5 @@
 import SensorReading from "../models/sensorReading.js"
-import { BUILDINGS } from "../utils/constants.js";
+import { BUILDINGS } from "../utils/constants.js"
 
 //to filter based on date, start date to end date is calculated and returned
 function dateRangeForDay(dateStr) {
@@ -17,6 +17,7 @@ function dateRangeForDay(dateStr) {
 
 
 const readingsContoller={}
+
 //List all buildings as array
 readingsContoller.listBuildings=async(req,res)=>{
     const buildings =BUILDINGS;
@@ -75,7 +76,7 @@ readingsContoller.dailyUsage=async(req,res)=>{
             };
         });
 
-
+        console.log(hours)
         res.json({ date: start, hours });
 
     } catch (err) {

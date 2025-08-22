@@ -1,5 +1,6 @@
 import SensorReading from "../models/sensorReading.js"
 
+
 const generateReadings=()=>{
         console.log("generating reading starts")
         const buildings=["B1","B2","B3"]

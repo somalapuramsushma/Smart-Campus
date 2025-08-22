@@ -1,15 +1,17 @@
 import {useParams} from "react-router-dom"
 import ChartComponent from "./chartComponent"
-import { useEffect, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import axios from "axios"
+import { BuildingContext } from "../context/buildingsContext"
 export default function BuildingDetails()
 {
     const {buildingId}=useParams()
     const [summary7days,setSummaryDays]=useState(null)
-    const [dailyUsagePerDay,setDailyUsagePerDay]=useState(null)
+    const [dailyUsagePerHour,setDailyUsagePerHour]=useState(null)
     const [sensorBreakdown,setSensorBreakdown]=useState(null)
 
     useEffect(()=>{
+
         if(buildingId){
             const fetchSummary= async()=>{
                 try{
@@ -26,6 +28,11 @@ export default function BuildingDetails()
 
             }
             fetchSummary()
+
+            const interval = setInterval(fetchSummary, 30000);
+
+    
+            return () => clearInterval(interval);
         }
         
     },[buildingId])
@@ -36,13 +43,12 @@ export default function BuildingDetails()
                 try {
                     const res= await axios.get(`http://localhost:5000/api/buildings/${buildingId}/daily-usage`)
                     if(res){
-                        setDailyUsagePerDay({
+                        setDailyUsagePerHour({
                             hours: res.data.hours.map(h => `${h.hour}:00`),   
                             lighting: res.data.hours.map(h => h.Lighting),   
                             hvac: res.data.hours.map(h => h.HVAC),          
                             equipment: res.data.hours.map(h => h.Equipment)  
                         });
-
                     }
 
                 } catch (error) {
@@ -50,25 +56,34 @@ export default function BuildingDetails()
                 }
             }
             todaysUsagePerHour()
+
+            const interval = setInterval(todaysUsagePerHour, 30000);
+
+    
+            return () => clearInterval(interval);
         }
     },[buildingId])
 
     useEffect(()=>{
-        if(dailyUsagePerDay){
+        if(dailyUsagePerHour){
             const sensorSetting=()=>{
                 
-                const lighting=dailyUsagePerDay?.lighting?.reduce((a, b) => a + b, 0)
-                const hvac=dailyUsagePerDay?.hvac?.reduce((a, b) => a + b, 0)
-                const eqm=dailyUsagePerDay?.equipment?.reduce((a, b) => a + b, 0)
+                const lighting=dailyUsagePerHour?.lighting?.reduce((a, b) => a + b, 0)
+                const hvac=dailyUsagePerHour?.hvac?.reduce((a, b) => a + b, 0)
+                const eqm=dailyUsagePerHour?.equipment?.reduce((a, b) => a + b, 0)
 
                 const total=lighting+hvac+eqm
                 setSensorBreakdown({lighting:(lighting/total)*100,hvac:(hvac/total)*100,equipment:(eqm/total)*100})
             }
             sensorSetting()
+            const interval = setInterval(sensorSetting, 30000);
+
+    
+            return () => clearInterval(interval);
         }
-    },[dailyUsagePerDay])
-    console.log(sensorBreakdown)
-    if(!buildingId) return <p>Locading</p>
+    },[dailyUsagePerHour])
+
+    if(!buildingId) return <p>Loading</p>
     return <div className="py-6 text-center">
         <h1 className="font-bold">Building-{buildingId}</h1>
         <br/><br/>
@@ -95,15 +110,15 @@ export default function BuildingDetails()
 
         <section>
             {
-                dailyUsagePerDay?<>
+                dailyUsagePerHour?<>
                 <ChartComponent
                     title="Todays usage Per Hour"
                     type="line"
-                    categories={dailyUsagePerDay.hours}
+                    categories={dailyUsagePerHour.hours}
                     series={[
-                        { name: "Lighting", data: dailyUsagePerDay.lighting, color: "#f7a35c" },
-                        { name: "HVAC", data: dailyUsagePerDay.hvac, color: "#7cb5ec" },
-                        { name: "Equipment", data: dailyUsagePerDay.equipment, color: "#90ed7d" }
+                        { name: "Lighting", data: dailyUsagePerHour.lighting, color: "#f7a35c" },
+                        { name: "HVAC", data: dailyUsagePerHour.hvac, color: "#7cb5ec" },
+                        { name: "Equipment", data: dailyUsagePerHour.equipment, color: "#90ed7d" }
                     ]}
                 />
                 </>:<><p>loading</p></>
@@ -134,5 +149,50 @@ export default function BuildingDetails()
                 />
             </>:<><p>loading</p></>}
         </section>
+
+        <br/><br/>
+
+        <section className="mt-8 p-6 bg-gray-100 rounded-xl shadow-md text-left max-w-2xl mx-auto">
+            <h2 className="font-bold text-lg mb-4">Insights</h2>
+            {summary7days && dailyUsagePerHour && sensorBreakdown ? (
+                <ul className="list-disc list-inside space-y-2 text-gray-700">
+                <li>
+                    Over the last 7 days, <strong>
+                    {summary7days.LightingAvg > summary7days.HVACAvg && summary7days.LightingAvg > summary7days.EquipmentAvg
+                    ? "Lighting"
+                    : summary7days.HVACAvg > summary7days.EquipmentAvg
+                    ? "HVAC"
+                    : "Equipment"}
+                    </strong> consumed the most energy on average.
+                </li>
+                <li>
+                    Todays peak usage was around{" "}
+                    <strong>
+                    {dailyUsagePerHour.hours[
+                        dailyUsagePerHour.lighting.indexOf(
+                        Math.max(...dailyUsagePerHour.lighting)
+                        )
+                    ]}
+                    </strong>{" "}
+                    for Lighting.
+                </li>
+                <li>
+                    HVAC accounted for <strong>{sensorBreakdown.hvac.toFixed(1)}%</strong> of today's total consumption.
+                </li>
+                <li>
+                    Total usage today ={" "}
+                    <strong>
+                    {dailyUsagePerHour.lighting.reduce((a, b) => a + b, 0) +
+                        dailyUsagePerHour.hvac.reduce((a, b) => a + b, 0) +
+                        dailyUsagePerHour.equipment.reduce((a, b) => a + b, 0)}{" "}
+                    kWh
+                    </strong>
+                </li>
+                </ul>
+            ) : (
+                <p>Loading insights...</p>
+            )}
+            </section>
+
     </div>
 }

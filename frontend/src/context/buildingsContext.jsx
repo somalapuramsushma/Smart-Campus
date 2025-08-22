@@ -11,7 +11,7 @@ export function BuildingContextProvider(props){
 
     const getReadingsOfBuilding=async(buildingId)=>{
         try{
-            const dateToday= new Date().toISOString
+            const dateToday=new Date().toISOString().split("T")[0];
             const response= await axios.get(`http://localhost:5000/api/buildings/${buildingId}/daily-usage?date=${dateToday}`)
             setBuildingsReadings((prev)=>({...prev,[buildingId]:response.hours}))
 
