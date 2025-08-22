@@ -1,5 +1,6 @@
 import { createContext, useEffect, useState } from "react";
 import axios from "axios"
+import { API_BASE } from "../config";
 
 export const BuildingContext= createContext()
 
@@ -12,7 +13,7 @@ export function BuildingContextProvider(props){
     const getReadingsOfBuilding=async(buildingId)=>{
         try{
             const dateToday=new Date().toISOString().split("T")[0];
-            const response= await axios.get(`http://localhost:5000/api/buildings/${buildingId}/daily-usage?date=${dateToday}`)
+            const response= await axios.get(`${API_BASE}/api/buildings/${buildingId}/daily-usage?date=${dateToday}`)
             setBuildingsReadings((prev)=>({...prev,[buildingId]:response.hours}))
 
         }
@@ -22,7 +23,7 @@ export function BuildingContextProvider(props){
     }
 
     useEffect(()=>{
-        axios.get("http://localhost:5000/api/buildings")
+        axios.get(`${API_BASE}/api/buildings`)
         .then((res)=>{
             setBuildings(res.data)
         })

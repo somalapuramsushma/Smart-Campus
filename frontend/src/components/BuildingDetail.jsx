@@ -3,6 +3,7 @@ import ChartComponent from "./chartComponent"
 import { useContext, useEffect, useState } from "react"
 import axios from "axios"
 import { BuildingContext } from "../context/buildingsContext"
+import { API_BASE } from "../config"
 export default function BuildingDetails()
 {
     const {buildingId}=useParams()
@@ -16,7 +17,7 @@ export default function BuildingDetails()
             const fetchSummary= async()=>{
                 try{
                     
-                    const summaryReading= await axios.get(`http://localhost:5000/api/buildings/${buildingId}/summary`)
+                    const summaryReading= await axios.get(`${API_BASE}/api/buildings/${buildingId}/summary`)
                     if(summaryReading){
                         
                         setSummaryDays(summaryReading.data)
@@ -41,7 +42,7 @@ export default function BuildingDetails()
         if(buildingId){
             const todaysUsagePerHour= async()=>{
                 try {
-                    const res= await axios.get(`http://localhost:5000/api/buildings/${buildingId}/daily-usage`)
+                    const res= await axios.get(`${API_BASE}/api/buildings/${buildingId}/daily-usage`)
                     if(res){
                         setDailyUsagePerHour({
                             hours: res.data.hours.map(h => `${h.hour}:00`),   

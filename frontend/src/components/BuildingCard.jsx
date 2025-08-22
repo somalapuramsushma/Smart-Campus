@@ -1,6 +1,7 @@
 import { useEffect , useState} from "react"
 import axios from "axios"
 import { Link } from "react-router-dom"
+import { API_BASE } from "../config"
 
 export default function BuildingCard({buildingId}){
 
@@ -15,11 +16,11 @@ export default function BuildingCard({buildingId}){
 
     useEffect(()=>{
         if(buildingId){
-            axios.get(`http://localhost:5000/api/buildings/${buildingId}/daily-usage?date=${today}`)
+            axios.get(`${API_BASE}/api/buildings/${buildingId}/daily-usage?date=${today}`)
             .then((response)=>{setTodaysData(response.data.hours)})
             .catch((error)=>{console.log(error)})
 
-            axios.get(`http://localhost:5000/api/buildings/${buildingId}/daily-usage?date=${yesterday}`)
+            axios.get(`${API_BASE}/api/buildings/${buildingId}/daily-usage?date=${yesterday}`)
             .then((response)=>{setYesterdaysData(response.data.hours)})
             .catch((error)=>{console.log(error)})
         }
